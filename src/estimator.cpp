@@ -5,9 +5,9 @@ Estimator::Estimator(){
   this->state = Eigen::VectorXd::Zero(13);
   this->P = Eigen::MatrixXd::Identity(12,12);
   this->zImu = Eigen::VectorXd::Zero(6);
-  this->QImu = Eigen::MatrixXd::Identity(12,12);
+  this->QImu = Eigen::MatrixXd::Zero(12,12);
 }
-void Estimator::predict(const double& dt){
+void Estimator::propagate(const double& dt){
   Eigen::VectorXd r(3),v(3),q(4),w(3);
 
   r = state.segment(0,3);
@@ -53,12 +53,12 @@ void Estimator::predict(const double& dt){
   this->P = F*this->P*F.transpose() + this->QImu;
 }
 
-void Estimator::update(const Eigen::VectorXd& z, const Eigen::MatrixXd& R, const Eigen::VectorXd (*simulateMeas)(const Eigen::VectorXd x),
-                       Eigen::MatrixXd H, const double dt){
+void Estimator::update(const Eigen::VectorXd& z, const Eigen::MatrixXd& R, const Eigen::VectorXd (*simulateMeas)(const Eigen::VectorXd& x),
+                       const Eigen::MatrixXd H, const double dt){
   Eigen::MatrixXd Y = H*this->P*H.transpose() + R;
   Eigen::MatrixXd C = this->P*H.transpose();
   Eigen::MatrixXd K = C*Y.inverse();
-  Eigen::VectorXd dz = (z - simulateMeas(this->state);
+  Eigen::VectorXd dz = (z - simulateMeas(this->state));
   Eigen::VectorXd dx = K*dz;
   this->state.segment(0,3) += dx.segment(0,3);
   Eigen::VectorXd dq(4);
@@ -75,7 +75,7 @@ void Estimator::update(const Eigen::VectorXd& z, const Eigen::MatrixXd& R, const
 }
 
 void Estimator::updateOpticalFlow(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt){
-  Eigen::MatrixXd H = Eigen::MatrixXd::Zeros(12,12); // dz/dx
+  Eigen::MatrixXd H = Eigen::MatrixXd::Zero(12,12); // dz/dx
   Eigen::Matrix3d z3 = Eigen::MatrixXd::Zero(3,3);
   Eigen::Matrix3d i3 = Eigen::MatrixXd::Identity(3,3);
   // H << math here
@@ -83,7 +83,7 @@ void Estimator::updateOpticalFlow(const Eigen::VectorXd& z, const Eigen::MatrixX
 }
 
 void Estimator::updateLidarFlow(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt){
-  Eigen::MatrixXd H = Eigen::MatrixXd::Zeros(12,12); // dz/dx
+  Eigen::MatrixXd H = Eigen::MatrixXd::Zero(12,12); // dz/dx
   Eigen::Matrix3d z3 = Eigen::MatrixXd::Zero(3,3);
   Eigen::Matrix3d i3 = Eigen::MatrixXd::Identity(3,3);
   // H << math here
@@ -91,7 +91,7 @@ void Estimator::updateLidarFlow(const Eigen::VectorXd& z, const Eigen::MatrixXd 
 }
 
 void Estimator::updateRgbPose(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt){
-  Eigen::MatrixXd H = Eigen::MatrixXd::Zeros(12,12); // dz/dx
+  Eigen::MatrixXd H = Eigen::MatrixXd::Zero(12,12); // dz/dx
   Eigen::Matrix3d z3 = Eigen::MatrixXd::Zero(3,3);
   Eigen::Matrix3d i3 = Eigen::MatrixXd::Identity(3,3);
   // H << math here
@@ -99,7 +99,7 @@ void Estimator::updateRgbPose(const Eigen::VectorXd& z, const Eigen::MatrixXd R,
 }
 
 void Estimator::updateLidarPose(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt){
-  Eigen::MatrixXd H = Eigen::MatrixXd::Zeros(12,12); // dz/dx
+  Eigen::MatrixXd H = Eigen::MatrixXd::Zero(12,12); // dz/dx
   Eigen::Matrix3d z3 = Eigen::MatrixXd::Zero(3,3);
   Eigen::Matrix3d i3 = Eigen::MatrixXd::Identity(3,3);
   // H << math here
@@ -108,7 +108,7 @@ void Estimator::updateLidarPose(const Eigen::VectorXd& z, const Eigen::MatrixXd 
 
 void Estimator::updateImu(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt){
   this->zImu = z;
-  this->QImu = Q;
+  this->QImu = R;
 }
 
 Eigen::VectorXd Estimator::getState(){

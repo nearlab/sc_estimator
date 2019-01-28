@@ -44,7 +44,7 @@ int main(int argc, char** argv){
   ros::Subscriber subLidarPose = nh.subscribe("/orbot/space/meas/lidar_pose",100,lidarPoseCallback);
 
   // Publishers
-  pubState = nh.advertise<nearlab_msgs::StateStamped>("/orbot/space/state/estimate",100);
+  ros::Publisher pubState = nh.advertise<nearlab_msgs::StateStamped>("/orbot/space/state/estimate",100);
   //pubStateCov = nh.advertise<nearlab_msgs::StateWithCovarianceStamped>("/orbot/space/state/state_cov",1000);
   
   // Setup Estimator
@@ -53,34 +53,45 @@ int main(int argc, char** argv){
 
   // Loop
   ros::Rate loop_rate(100);
-
+  ros::Time tPrev = ros::Time::now();
   ROS_INFO("Estimator Node Listening");
+  int sequence = 0;
 
   while(ros::ok()){
     // dynamics
+    ros::Time tCurr = ros::Time::now();
+    double dt = (tCurr - tPrev).toSec();
+    tPrev = tCurr;
+    estimator.propagate(dt);
 
     // publish
 
-    nearlab::StateStamped stateMsg;
-    state = estimator.getState();
-    for(int i=0;i<3;i++){//There are better ways
-      stateMsg.r[i] = state(i);
-      stateMsg.q[i] = state(i+3);
-      stateMsg.v[i] = state(i+7);
-      stateMsg.ba[i] = state(i+10);
-    }
-    stateMsg.q[3] = state(6);
-    ros::Time tsNow = ros::Time::now();
-    stateMsg.tStamp = tsNow.toSec();
+    nearlab_msgs::StateStamped stateMsg;
+    Eigen::VectorXd state = estimator.getState();
+    stateMsg.header.seq = sequence++;
+    stateMsg.header.stamp = ros::Time::now();
+    stateMsg.r.x = state(0);
+    stateMsg.r.y = state(1);
+    stateMsg.r.z = state(2);
+    stateMsg.q.x = state(3);
+    stateMsg.q.y = state(4);
+    stateMsg.q.z = state(5);
+    stateMsg.q.w = state(6);
+    stateMsg.v.x = state(7);
+    stateMsg.v.y = state(8);
+    stateMsg.v.z = state(9);
+    stateMsg.w.x = state(10);
+    stateMsg.w.y = state(11);
+    stateMsg.w.z = state(12);
     pubState.publish(stateMsg);
 
-    nearlab::StateCov stateCovMsg;
-    P = estimator.getCovariance();
-    for(int i=0;i<P.rows();i++){
-      stateCovMsg.P[i] = P(i,i);
-    }
-    stateCovMsg.tStamp = tsNow.toSec();
-    pubStateCov.publish(stateCovMsg);
+    // nearlab::StateCov stateCovMsg;
+    // P = estimator.getCovariance();
+    // for(int i=0;i<P.rows();i++){
+    //   stateCovMsg.P[i] = P(i,i);
+    // }
+    // stateCovMsg.tStamp = tsNow.toSec();
+    // pubStateCov.publish(stateCovMsg);
 
     ros::spinOnce();
     loop_rate.sleep();

@@ -9,8 +9,8 @@ class Estimator{
 public:
   Estimator();
   void propagate(const double& dt);
-  void update(const Eigen::VectorXd& z, const Eigen::MatrixXd& R, const Eigen::VectorXd (*simulateMeas)(const Eigen::VectorXd x),
-                         Eigen::MatrixXd H, const double dt)
+  void update(const Eigen::VectorXd& z, const Eigen::MatrixXd& R, const Eigen::VectorXd (*simulateMeas)(const Eigen::VectorXd& x),
+                         const Eigen::MatrixXd H, const double dt);
   void updateOpticalFlow(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt);
   void updateLidarFlow(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt);
   void updateRgbPose(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt);
