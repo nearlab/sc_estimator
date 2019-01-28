@@ -15,7 +15,7 @@ Estimator::Estimator(){
 }
 void Estimator::propagate(const double& dt){
   if(dtImu == 0){
-    continue;
+    return;
   }
   Eigen::VectorXd r(3),v(3),q(4),w(3);
 

@@ -73,7 +73,7 @@ void rgbPoseCallback(const geometry_msgs::PoseWithCovarianceStamped msg){
   z(6) = msg.pose.pose.orientation.w;
   Eigen::MatrixXd R = Eigen::MatrixXd::Zero(6,6);
   for(int i=0;i<49;i++){
-    R((int)(i/7),i%7) = msg.covariance[i];// Assumes first n values in the covariance vector are the top row in the matrix
+    R((int)(i/7),i%7) = msg.pose.covariance[i];// Assumes first n values in the covariance vector are the top row in the matrix
   }
   estimator.updateRgbPose(z,R,t);
 }
@@ -90,7 +90,7 @@ void lidarPoseCallback(const geometry_msgs::PoseWithCovarianceStamped msg){
   z(6) = msg.pose.pose.orientation.w;
   Eigen::MatrixXd R = Eigen::MatrixXd::Zero(6,6);
   for(int i=0;i<49;i++){
-    R((int)(i/7),i%7) = msg.covariance[i];// Assumes first n values in the covariance vector are the top row in the matrix
+    R((int)(i/7),i%7) = msg.pose.covariance[i];// Assumes first n values in the covariance vector are the top row in the matrix
   }
   estimator.updateLidarPose(z,R,t);
 }
@@ -109,7 +109,6 @@ int main(int argc, char** argv){
   // Publishers
   ros::Publisher pubState = nh.advertise<nearlab_msgs::StateStamped>("/orbot/space/state/estimate",100);
   //pubStateCov = nh.advertise<nearlab_msgs::StateWithCovarianceStamped>("/orbot/space/state/state_cov",1000);
-
   // Loop
   ros::Rate loop_rate(100);
   ros::Time tPrev = ros::Time::now();
