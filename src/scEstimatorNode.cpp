@@ -4,7 +4,8 @@
 #include <Eigen/Dense> 
 
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
-#include "geometry_msgs/AccelWithCovarianceStamped.h"
+#include "nearlab_msgs/ImuWithCovarianceStamped.h"
+#include "nearlab_msgs/FlowWithCovarianceStamped.h"
 #include "nearlab_msgs/StateStamped.h"
 
 #include "estimator.h"
@@ -14,22 +15,84 @@ Estimator estimator;
 
 //callbacks
 //Each callback updates estimator
-void imuCallback(const geometry_msgs::AccelWithCovarianceStamped msg){
-
+void imuCallback(const nearlab_msgs::ImuWithCovarianceStamped msg){
+  double t = msg.header.stamp.toSec();
+  Eigen::VectorXd z = Eigen::VectorXd::Zero(6);
+  z(0) = msg.accel.x;
+  z(1) = msg.accel.y;
+  z(2) = msg.accel.z;
+  z(3) = msg.gyro.x;
+  z(4) = msg.gyro.y;
+  z(5) = msg.gyro.z;
+  Eigen::MatrixXd R = Eigen::MatrixXd::Zero(6,6);
+  for(int i=0;i<36;i++){
+    R((int)(i/6),i%6) = msg.covariance[i];// Assumes first n values in the covariance vector are the top row in the matrix
+  }
+  estimator.updateImu(z,R,t);
 }
-void opticalFlowCallback(const geometry_msgs::PoseWithCovarianceStamped msg){
-
+void opticalFlowCallback(const nearlab_msgs::FlowWithCovarianceStamped msg){
+  double t = msg.header.stamp.toSec();
+  Eigen::VectorXd z = Eigen::VectorXd::Zero(6);
+  z(0) = msg.linear_vel.x;
+  z(1) = msg.linear_vel.y;
+  z(2) = msg.linear_vel.z;
+  z(3) = msg.angular_vel.x;
+  z(4) = msg.angular_vel.y;
+  z(5) = msg.angular_vel.z;
+  Eigen::MatrixXd R = Eigen::MatrixXd::Zero(6,6);
+  for(int i=0;i<36;i++){
+    R((int)(i/6),i%6) = msg.covariance[i];// Assumes first n values in the covariance vector are the top row in the matrix
+  }
+  estimator.updateOpticalFlow(z,R,t);
 }
-void lidarFlowCallback(const geometry_msgs::PoseWithCovarianceStamped msg){
-
+void lidarFlowCallback(const nearlab_msgs::FlowWithCovarianceStamped msg){
+  double t = msg.header.stamp.toSec();
+  Eigen::VectorXd z = Eigen::VectorXd::Zero(6);
+  z(0) = msg.linear_vel.x;
+  z(1) = msg.linear_vel.y;
+  z(2) = msg.linear_vel.z;
+  z(3) = msg.angular_vel.x;
+  z(4) = msg.angular_vel.y;
+  z(5) = msg.angular_vel.z;
+  Eigen::MatrixXd R = Eigen::MatrixXd::Zero(6,6);
+  for(int i=0;i<36;i++){
+    R((int)(i/6),i%6) = msg.covariance[i];// Assumes first n values in the covariance vector are the top row in the matrix
+  }
+  estimator.updateLidarFlow(z,R,t);
 }
 // This comes from the RGB camera
 void rgbPoseCallback(const geometry_msgs::PoseWithCovarianceStamped msg){
-
+  double t = msg.header.stamp.toSec();
+  Eigen::VectorXd z = Eigen::VectorXd::Zero(7);
+  z(0) = msg.pose.pose.position.x;
+  z(1) = msg.pose.pose.position.y;
+  z(2) = msg.pose.pose.position.z;
+  z(3) = msg.pose.pose.orientation.x;
+  z(4) = msg.pose.pose.orientation.y;
+  z(5) = msg.pose.pose.orientation.z;
+  z(6) = msg.pose.pose.orientation.w;
+  Eigen::MatrixXd R = Eigen::MatrixXd::Zero(6,6);
+  for(int i=0;i<49;i++){
+    R((int)(i/7),i%7) = msg.covariance[i];// Assumes first n values in the covariance vector are the top row in the matrix
+  }
+  estimator.updateRgbPose(z,R,t);
 }
 // This comes from the realsense camera
 void lidarPoseCallback(const geometry_msgs::PoseWithCovarianceStamped msg){
-
+  double t = msg.header.stamp.toSec();
+  Eigen::VectorXd z = Eigen::VectorXd::Zero(7);
+  z(0) = msg.pose.pose.position.x;
+  z(1) = msg.pose.pose.position.y;
+  z(2) = msg.pose.pose.position.z;
+  z(3) = msg.pose.pose.orientation.x;
+  z(4) = msg.pose.pose.orientation.y;
+  z(5) = msg.pose.pose.orientation.z;
+  z(6) = msg.pose.pose.orientation.w;
+  Eigen::MatrixXd R = Eigen::MatrixXd::Zero(6,6);
+  for(int i=0;i<49;i++){
+    R((int)(i/7),i%7) = msg.covariance[i];// Assumes first n values in the covariance vector are the top row in the matrix
+  }
+  estimator.updateLidarPose(z,R,t);
 }
 
 int main(int argc, char** argv){
@@ -46,10 +109,6 @@ int main(int argc, char** argv){
   // Publishers
   ros::Publisher pubState = nh.advertise<nearlab_msgs::StateStamped>("/orbot/space/state/estimate",100);
   //pubStateCov = nh.advertise<nearlab_msgs::StateWithCovarianceStamped>("/orbot/space/state/state_cov",1000);
-  
-  // Setup Estimator
-  
-
 
   // Loop
   ros::Rate loop_rate(100);

@@ -1,14 +1,19 @@
 #include "simulator.h"
 
-const Eigen::VectorXd simulateOpticalFlow(const Eigen::VectorXd& x){
-    return Eigen::VectorXd::Zero(6);
+Eigen::VectorXd simulateOpticalFlow(const Eigen::VectorXd& x){
+    Eigen::VectorXd zHat = x.tail(6,6);
+    return zHat;
+
 }
-const Eigen::VectorXd simulateLidarFlow(const Eigen::VectorXd& x){
-    return Eigen::VectorXd::Zero(6);
+Eigen::VectorXd simulateLidarFlow(const Eigen::VectorXd& x){
+    Eigen::VectorXd zHat = x.tail(6,6);
+    return zHat;
 }
-const Eigen::VectorXd simulateRgbPose(const Eigen::VectorXd& x){
-    return Eigen::VectorXd::Zero(7);
+Eigen::VectorXd simulateRgbPose(const Eigen::VectorXd& x){
+    Eigen::VectorXd zHat = x.head(6);
+    return zHat;
 }
-const Eigen::VectorXd simulateLidarPose(const Eigen::VectorXd& x){
-    return Eigen::VectorXd::Zero(7);
+Eigen::VectorXd simulateLidarPose(const Eigen::VectorXd& x){
+    Eigen::VectorXd zHat = x.head(6);
+    return zHat;
 }
