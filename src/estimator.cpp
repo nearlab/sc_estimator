@@ -131,6 +131,10 @@ void Estimator::updateLidarPose(const Eigen::VectorXd& z, const Eigen::MatrixXd 
   this->update(z.head(6),R,simulateLidarPose,H,dt);
 }
 
+void updateLidarRaw(const Eigen::VectorXd& z, constEigen::VectorXd& rI, const Eigen::MatrixXd R, const double& dt){
+  
+}
+
 void Estimator::updateImu(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& t){
   this->zImu = z;
   this->QImu = R;

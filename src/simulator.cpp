@@ -17,3 +17,8 @@ Eigen::VectorXd simulateLidarPose(const Eigen::VectorXd& x){
     Eigen::VectorXd zHat = x.head(6);
     return zHat;
 }
+
+Eigen::VectorXd simulateLidarRaw(const Eigen::VectorXd& x, const Eigen::VectorXd& rI){
+    Eigen::VectorXd zHat = x.head(6);
+    return zHat;
+}

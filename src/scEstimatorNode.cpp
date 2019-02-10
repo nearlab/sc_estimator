@@ -95,6 +95,22 @@ void lidarPoseCallback(const geometry_msgs::PoseWithCovarianceStamped msg){
   estimator.updateLidarPose(z,R,t);
 }
 
+void lidarMeasCallback(const nearlab_msgs::LidarRawWithCovarianceStamped msg){
+  double t = msg.header.stamp.toSec();
+  int n = msg.z.size();
+  Eigen::VectorXd z = Eigen::VectorXd::Zeros(3*n);
+  Eigen::MatrixXd rI = Eigen::VectorXd::Zeros(3,n);
+  Eigen::MatrixXd R = Eigen::MatrixXd::Zero(3*n,3*n);
+  for(int i = 0;i<n;i++){
+    z.segment(3*i,3) << msg.z[i].x,msg.z[i].y,msg.z[i].z;
+    rI.col(i) << msg.rI[i].x,msg.rI[i].y,msg.rI[i].z;
+    R.block(3*i,3*i,3,3) << msg.covariance[i*9+0],msg.covariance[i*9+1],msg.covariance[i*9+2],
+                            msg.covariance[i*9+3],msg.covariance[i*9+4],msg.covariance[i*9+5],
+                            msg.covariance[i*9+6],msg.covariance[i*9+7],msg.covariance[i*9+8];
+  }
+  estimator.updateLidarRaw(z,rI,R,t);
+}
+
 int main(int argc, char** argv){
   ros::init(argc,argv,"sc_estimator");
   ros::NodeHandle nh;

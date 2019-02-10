@@ -15,6 +15,7 @@ public:
   void updateLidarFlow(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt);
   void updateRgbPose(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt);
   void updateLidarPose(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt);
+  void updateLidarRaw(const Eigen::VectorXd& z, constEigen::VectorXd& rI, const Eigen::MatrixXd R, const double& dt);
   void updateImu(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt);
   Eigen::VectorXd getState();
   Eigen::MatrixXd getCovariance();
