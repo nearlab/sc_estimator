@@ -1,6 +1,7 @@
 #include <Eigen/Dense>
 #include <math.h>
 #include "quatMath.h"
+#include "simulator.h"
 
 #ifndef ESTIMATOR_H
 #define ESTIMATOR_H
@@ -15,7 +16,7 @@ public:
   void updateLidarFlow(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt);
   void updateRgbPose(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt);
   void updateLidarPose(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt);
-  void updateLidarRaw(const Eigen::VectorXd& z, constEigen::VectorXd& rI, const Eigen::MatrixXd R, const double& dt);
+  void updateLidarRaw(const Eigen::VectorXd& z, constEigen::MatrixXd& rI, const Eigen::MatrixXd R, const double& dt);
   void updateImu(const Eigen::VectorXd& z, const Eigen::MatrixXd R, const double& dt);
   Eigen::VectorXd getState();
   Eigen::MatrixXd getCovariance();
@@ -24,7 +25,8 @@ private:
   Eigen::MatrixXd P;
   Eigen::VectorXd zImu;
   Eigen::MatrixXd QImu;
-  double dtImu, tImu, tOpticalFlow, tLidarFlow, tRgbPose, tLidarPose;
+  double dtImu, tImu, tOpticalFlow, tLidarFlow, tRgbPose, tLidarPose, tLidarRaw;
   int updateCount;
+  Simulator sim;
 };
 #endif
